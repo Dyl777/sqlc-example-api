@@ -114,11 +114,11 @@ func (h *DashboardHandler) handleListDockerContainers(c *gin.Context) {
 	for _, container := range containers {
 		var coreData, customFields map[string]interface{}
 		if err := json.Unmarshal(container.CoreData, &coreData); err != nil {
-			log.Printf("Failed to unmarshal core data for container %d: %v", container.ID, err)
+			log.Printf("Failed to unmarshal core data for container %s: %v", container.ID, err)
 			coreData = make(map[string]interface{})
 		}
 		if err := json.Unmarshal(container.CustomFields, &customFields); err != nil {
-			log.Printf("Failed to unmarshal custom fields for container %d: %v", container.ID, err)
+			log.Printf("Failed to unmarshal custom fields for container %s: %v", container.ID, err)
 			customFields = make(map[string]interface{})
 		}
 
@@ -212,11 +212,11 @@ func (h *DashboardHandler) handleListGitRepos(c *gin.Context) {
 	for _, repo := range repos {
 		var coreData, customFields map[string]interface{}
 		if err := json.Unmarshal(repo.CoreData, &coreData); err != nil {
-			log.Printf("Failed to unmarshal core data for repo %d: %v", repo.ID, err)
+			log.Printf("Failed to unmarshal core data for repo %s: %v", repo.ID, err)
 			coreData = make(map[string]interface{})
 		}
 		if err := json.Unmarshal(repo.CustomFields, &customFields); err != nil {
-			log.Printf("Failed to unmarshal custom fields for repo %d: %v", repo.ID, err)
+			log.Printf("Failed to unmarshal custom fields for repo %s: %v", repo.ID, err)
 			customFields = make(map[string]interface{})
 		}
 

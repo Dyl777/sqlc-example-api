@@ -207,6 +207,20 @@ if err := json.Unmarshal(jsonBytes, &data); err != nil {
 - Remove functions that aren't called anywhere
 - Or add `//nolint:unused` comment if you plan to use them later
 
+**Printf format errors (`govet`):**
+```go
+// Bad - wrong format for string ID
+log.Printf("Failed for item %d: %v", item.ID, err) // ID is string, not int
+
+// Good - correct format for string ID  
+log.Printf("Failed for item %s: %v", item.ID, err) // %s for strings
+```
+
+Common format specifiers:
+- `%s` for strings
+- `%d` for integers  
+- `%v` for any value (safe fallback)
+
 **fixes:**
 - Always check error return values from functions
 - Remove or comment unused code
