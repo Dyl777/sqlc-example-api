@@ -1,4 +1,4 @@
--- Dashboard related tables
+
 
 -- Docker containers table with flexible schema
 CREATE TABLE "docker_container" (
@@ -6,7 +6,7 @@ CREATE TABLE "docker_container" (
   "name" VARCHAR(100) NOT NULL,
   "status" VARCHAR(20) NOT NULL,
   "core_data" JSONB NOT NULL DEFAULT '{}',
-  "custom_fields" JSONB DEFAULT '{}',
+  "custom_fields" JSONB DEFAULT '{}', -- JSONB is supported by postgress allowing you to store json objects as fields
   "schema_version" INTEGER DEFAULT 1,
   "created_at" TIMESTAMP DEFAULT now(),
   "updated_at" TIMESTAMP DEFAULT now()
@@ -23,7 +23,7 @@ CREATE TABLE "git_repo" (
   "updated_at" TIMESTAMP DEFAULT now()
 );
 
--- Cache data table with flexible schema
+
 CREATE TABLE "cache_data" (
   "id" VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
   "technology" VARCHAR(50) NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE "cache_data" (
   "updated_at" TIMESTAMP DEFAULT now()
 );
 
--- Log entries table with flexible schema
+
 CREATE TABLE "log_entry" (
   "id" VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
   "level" VARCHAR(10) NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE "log_entry" (
   "updated_at" TIMESTAMP DEFAULT now()
 );
 
--- Secrets table with flexible schema
+
 CREATE TABLE "secret" (
   "id" VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
   "description" TEXT NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE "secret" (
   "updated_at" TIMESTAMP DEFAULT now()
 );
 
--- Registry data table with flexible schema
+
 CREATE TABLE "registry_data" (
   "id" VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
   "subkey" VARCHAR(500) NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE "registry_data" (
   "updated_at" TIMESTAMP DEFAULT now()
 );
 
--- Plist data table with flexible schema
+
 CREATE TABLE "plist_data" (
   "id" VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
   "key" VARCHAR(200) NOT NULL,

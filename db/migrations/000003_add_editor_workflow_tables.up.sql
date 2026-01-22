@@ -1,4 +1,3 @@
--- Editor configuration and workflow tables
 
 -- Editor configurations table
 CREATE TABLE "editor_config" (
@@ -9,7 +8,7 @@ CREATE TABLE "editor_config" (
   "updated_at" TIMESTAMP DEFAULT now()
 );
 
--- Workflows table
+
 CREATE TABLE "workflow" (
   "id" VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
   "name" VARCHAR(100) NOT NULL,
@@ -23,7 +22,7 @@ CREATE TABLE "workflow" (
   "updated_at" TIMESTAMP DEFAULT now()
 );
 
--- Workflow nodes table (for easier querying)
+-- Workflow nodes table
 CREATE TABLE "workflow_node" (
   "id" VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
   "workflow_id" VARCHAR(36) NOT NULL REFERENCES workflow(id) ON DELETE CASCADE,
