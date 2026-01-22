@@ -94,8 +94,16 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 				"unlimitedMem": container["unlimitedMem"],
 			}
 
-			coreDataJSON, _ := json.Marshal(coreData)
-			customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+			coreDataJSON, err := json.Marshal(coreData)
+			if err != nil {
+				log.Printf("Failed to marshal core data for container %s: %v", container["name"], err)
+				continue
+			}
+			customFieldsJSON, err := json.Marshal(map[string]interface{}{})
+			if err != nil {
+				log.Printf("Failed to marshal custom fields for container %s: %v", container["name"], err)
+				continue
+			}
 
 			params := repo.CreateDockerContainerParams{
 				Name:          container["name"].(string),
@@ -105,7 +113,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 				SchemaVersion: int32Ptr(1),
 			}
 
-			_, err := querier.CreateDockerContainer(ctx, params)
+			_, err = querier.CreateDockerContainer(ctx, params)
 			if err != nil {
 				log.Printf("Failed to create container %s: %v", container["name"], err)
 			} else {
@@ -126,8 +134,16 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 				"clonedNeverBuilt": repoInfo["clonedNeverBuilt"],
 			}
 
-			coreDataJSON, _ := json.Marshal(coreData)
-			customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+			coreDataJSON, err := json.Marshal(coreData)
+			if err != nil {
+				log.Printf("Failed to marshal core data for repo %s: %v", repoInfo["name"], err)
+				continue
+			}
+			customFieldsJSON, err := json.Marshal(map[string]interface{}{})
+			if err != nil {
+				log.Printf("Failed to marshal custom fields for repo %s: %v", repoInfo["name"], err)
+				continue
+			}
 
 			params := repo.CreateGitRepoParams{
 				Name:          repoInfo["name"].(string),
@@ -136,7 +152,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 				SchemaVersion: int32Ptr(1),
 			}
 
-			_, err := querier.CreateGitRepo(ctx, params)
+			_, err = querier.CreateGitRepo(ctx, params)
 			if err != nil {
 				log.Printf("Failed to create repo %s: %v", repoInfo["name"], err)
 			} else {
@@ -154,8 +170,16 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 						"size": size,
 					}
 
-					coreDataJSON, _ := json.Marshal(coreData)
-					customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+					coreDataJSON, err := json.Marshal(coreData)
+					if err != nil {
+						log.Printf("Failed to marshal core data for cache %s/%s: %v", technology, cacheType, err)
+						continue
+					}
+					customFieldsJSON, err := json.Marshal(map[string]interface{}{})
+					if err != nil {
+						log.Printf("Failed to marshal custom fields for cache %s/%s: %v", technology, cacheType, err)
+						continue
+					}
 
 					params := repo.CreateCacheDataParams{
 						Technology:    technology,
@@ -165,7 +189,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 						SchemaVersion: int32Ptr(1),
 					}
 
-					_, err := querier.CreateCacheData(ctx, params)
+					_, err = querier.CreateCacheData(ctx, params)
 					if err != nil {
 						log.Printf("Failed to create cache data %s/%s: %v", technology, cacheType, err)
 					} else {
@@ -190,8 +214,16 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 						"originalEntry": logStr,
 					}
 
-					coreDataJSON, _ := json.Marshal(coreData)
-					customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+					coreDataJSON, err := json.Marshal(coreData)
+					if err != nil {
+						log.Printf("Failed to marshal core data for log entry: %v", err)
+						continue
+					}
+					customFieldsJSON, err := json.Marshal(map[string]interface{}{})
+					if err != nil {
+						log.Printf("Failed to marshal custom fields for log entry: %v", err)
+						continue
+					}
 
 					now := time.Now()
 					params := repo.CreateLogEntryParams{
@@ -203,7 +235,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 						Timestamp:     pgtype.Timestamp{Time: now, Valid: true},
 					}
 
-					_, err := querier.CreateLogEntry(ctx, params)
+					_, err = querier.CreateLogEntry(ctx, params)
 					if err != nil {
 						log.Printf("Failed to create log entry: %v", err)
 					} else {
@@ -222,8 +254,16 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 					"location": secretStr,
 				}
 
-				coreDataJSON, _ := json.Marshal(coreData)
-				customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+				coreDataJSON, err := json.Marshal(coreData)
+				if err != nil {
+					log.Printf("Failed to marshal core data for secret: %v", err)
+					continue
+				}
+				customFieldsJSON, err := json.Marshal(map[string]interface{}{})
+				if err != nil {
+					log.Printf("Failed to marshal custom fields for secret: %v", err)
+					continue
+				}
 
 				params := repo.CreateSecretParams{
 					Description:   secretStr,
@@ -232,7 +272,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 					SchemaVersion: int32Ptr(1),
 				}
 
-				_, err := querier.CreateSecret(ctx, params)
+				_, err = querier.CreateSecret(ctx, params)
 				if err != nil {
 					log.Printf("Failed to create secret: %v", err)
 				} else {
@@ -251,8 +291,16 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 					"type": regMap["type"],
 				}
 
-				coreDataJSON, _ := json.Marshal(coreData)
-				customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+				coreDataJSON, err := json.Marshal(coreData)
+				if err != nil {
+					log.Printf("Failed to marshal core data for registry data: %v", err)
+					continue
+				}
+				customFieldsJSON, err := json.Marshal(map[string]interface{}{})
+				if err != nil {
+					log.Printf("Failed to marshal custom fields for registry data: %v", err)
+					continue
+				}
 
 				params := repo.CreateRegistryDataParams{
 					Subkey:        regMap["subkey"].(string),
@@ -262,7 +310,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 					SchemaVersion: int32Ptr(1),
 				}
 
-				_, err := querier.CreateRegistryData(ctx, params)
+				_, err = querier.CreateRegistryData(ctx, params)
 				if err != nil {
 					log.Printf("Failed to create registry data: %v", err)
 				} else {
@@ -281,8 +329,16 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 					"type":  plistMap["type"],
 				}
 
-				coreDataJSON, _ := json.Marshal(coreData)
-				customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+				coreDataJSON, err := json.Marshal(coreData)
+				if err != nil {
+					log.Printf("Failed to marshal core data for plist data: %v", err)
+					continue
+				}
+				customFieldsJSON, err := json.Marshal(map[string]interface{}{})
+				if err != nil {
+					log.Printf("Failed to marshal custom fields for plist data: %v", err)
+					continue
+				}
 
 				params := repo.CreatePlistDataParams{
 					Key:           plistMap["key"].(string),
@@ -291,7 +347,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 					SchemaVersion: int32Ptr(1),
 				}
 
-				_, err := querier.CreatePlistData(ctx, params)
+				_, err = querier.CreatePlistData(ctx, params)
 				if err != nil {
 					log.Printf("Failed to create plist data: %v", err)
 				} else {
@@ -328,24 +384,4 @@ func seedEditorConfig(ctx context.Context, querier *repo.Queries) error {
 // Helper functions
 func int32Ptr(i int32) *int32 {
 	return &i
-}
-
-func getStringPtr(v interface{}) *string {
-	if v == nil {
-		return nil
-	}
-	if str, ok := v.(string); ok {
-		return &str
-	}
-	return nil
-}
-
-func getBoolPtr(v interface{}) *bool {
-	if v == nil {
-		return nil
-	}
-	if b, ok := v.(bool); ok {
-		return &b
-	}
-	return nil
 }

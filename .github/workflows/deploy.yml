@@ -24,6 +24,8 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: telemetry-api-${{ github.sha }}
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Deploy to staging server
       run: |
@@ -44,6 +46,8 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: telemetry-api-${{ github.sha }}
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create release
       id: create_release
