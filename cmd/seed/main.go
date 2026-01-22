@@ -7,8 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
@@ -65,7 +67,7 @@ func run() error {
 
 func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 	// Read dashboard.json
-	data, err := ioutil.ReadFile("mydata/dashboard.json")
+	data, err := ioutil.ReadFile("mysampledata/dashboard.json")
 	if err != nil {
 		return fmt.Errorf("failed to read dashboard.json: %w", err)
 	}
@@ -81,25 +83,28 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 		for _, containerData := range containers {
 			container := containerData.(map[string]interface{})
 
-			var lastRun *time.Time
-			if lastRunStr, ok := container["lastRun"].(string); ok {
-				if parsed, err := time.Parse("2006-01-02", lastRunStr); err == nil {
-					lastRun = &parsed
-				}
+			// Prepare core data
+			coreData := map[string]interface{}{
+				"lastRun":      container["lastRun"],
+				"origin":       container["origin"],
+				"disk":         container["disk"],
+				"ram":          container["ram"],
+				"unused":       container["unused"],
+				"highMem":      container["highMem"],
+				"root":         container["root"],
+				"exposedPorts": container["exposedPorts"],
+				"unlimitedMem": container["unlimitedMem"],
 			}
 
+			coreDataJSON, _ := json.Marshal(coreData)
+			customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+
 			params := repo.CreateDockerContainerParams{
-				Name:         container["name"].(string),
-				Status:       container["status"].(string),
-				LastRun:      lastRun,
-				Origin:       getStringPtr(container["origin"]),
-				Disk:         getStringPtr(container["disk"]),
-				Ram:          getStringPtr(container["ram"]),
-				Unused:       getBoolPtr(container["unused"]),
-				HighMem:      getBoolPtr(container["highMem"]),
-				Root:         getBoolPtr(container["root"]),
-				ExposedPorts: getBoolPtr(container["exposedPorts"]),
-				UnlimitedMem: getBoolPtr(container["unlimitedMem"]),
+				Name:          container["name"].(string),
+				Status:        container["status"].(string),
+				CoreData:      coreDataJSON,
+				CustomFields:  customFieldsJSON,
+				SchemaVersion: int32Ptr(1),
 			}
 
 			_, err := querier.CreateDockerContainer(ctx, params)
@@ -114,20 +119,186 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 	// Seed git repositories
 	if repos, ok := dashboard["gitRepos"].([]interface{}); ok {
 		for _, repoData := range repos {
-			repo := repoData.(map[string]interface{})
+			repoInfo := repoData.(map[string]interface{})
+
+			// Prepare core data
+			coreData := map[string]interface{}{
+				"untouched":        repoInfo["untouched"],
+				"duplicate":        repoInfo["duplicate"],
+				"clonedNeverBuilt": repoInfo["clonedNeverBuilt"],
+			}
+
+			coreDataJSON, _ := json.Marshal(coreData)
+			customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
 
 			params := repo.CreateGitRepoParams{
-				Name:             repo["name"].(string),
-				Untouched:        getStringPtr(repo["untouched"]),
-				Duplicate:        getBoolPtr(repo["duplicate"]),
-				ClonedNeverBuilt: getBoolPtr(repo["clonedNeverBuilt"]),
+				Name:          repoInfo["name"].(string),
+				CoreData:      coreDataJSON,
+				CustomFields:  customFieldsJSON,
+				SchemaVersion: int32Ptr(1),
 			}
 
 			_, err := querier.CreateGitRepo(ctx, params)
 			if err != nil {
-				log.Printf("Failed to create repo %s: %v", repo["name"], err)
+				log.Printf("Failed to create repo %s: %v", repoInfo["name"], err)
 			} else {
-				fmt.Printf("Created repository: %s\n", repo["name"])
+				fmt.Printf("Created repository: %s\n", repoInfo["name"])
+			}
+		}
+	}
+
+	// Seed cache data
+	if cacheData, ok := dashboard["cacheData"].(map[string]interface{}); ok {
+		for technology, techData := range cacheData {
+			if techMap, ok := techData.(map[string]interface{}); ok {
+				for cacheType, size := range techMap {
+					coreData := map[string]interface{}{
+						"size": size,
+					}
+
+					coreDataJSON, _ := json.Marshal(coreData)
+					customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+
+					params := repo.CreateCacheDataParams{
+						Technology:    technology,
+						CacheType:     cacheType,
+						CoreData:      coreDataJSON,
+						CustomFields:  customFieldsJSON,
+						SchemaVersion: int32Ptr(1),
+					}
+
+					_, err := querier.CreateCacheData(ctx, params)
+					if err != nil {
+						log.Printf("Failed to create cache data %s/%s: %v", technology, cacheType, err)
+					} else {
+						fmt.Printf("Created cache data: %s/%s\n", technology, cacheType)
+					}
+				}
+			}
+		}
+	}
+
+	// Seed log entries
+	if logEntries, ok := dashboard["logEntries"].([]interface{}); ok {
+		for _, logData := range logEntries {
+			if logStr, ok := logData.(string); ok {
+				// Parse log entry format: "LEVEL: Message at TIME"
+				parts := strings.SplitN(logStr, ":", 2)
+				if len(parts) == 2 {
+					level := strings.TrimSpace(parts[0])
+					message := strings.TrimSpace(parts[1])
+
+					coreData := map[string]interface{}{
+						"originalEntry": logStr,
+					}
+
+					coreDataJSON, _ := json.Marshal(coreData)
+					customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+
+					now := time.Now()
+					params := repo.CreateLogEntryParams{
+						Level:         level,
+						Message:       message,
+						CoreData:      coreDataJSON,
+						CustomFields:  customFieldsJSON,
+						SchemaVersion: int32Ptr(1),
+						Timestamp:     pgtype.Timestamp{Time: now, Valid: true},
+					}
+
+					_, err := querier.CreateLogEntry(ctx, params)
+					if err != nil {
+						log.Printf("Failed to create log entry: %v", err)
+					} else {
+						fmt.Printf("Created log entry: %s\n", level)
+					}
+				}
+			}
+		}
+	}
+
+	// Seed secrets
+	if secrets, ok := dashboard["secrets"].([]interface{}); ok {
+		for _, secretData := range secrets {
+			if secretStr, ok := secretData.(string); ok {
+				coreData := map[string]interface{}{
+					"location": secretStr,
+				}
+
+				coreDataJSON, _ := json.Marshal(coreData)
+				customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+
+				params := repo.CreateSecretParams{
+					Description:   secretStr,
+					CoreData:      coreDataJSON,
+					CustomFields:  customFieldsJSON,
+					SchemaVersion: int32Ptr(1),
+				}
+
+				_, err := querier.CreateSecret(ctx, params)
+				if err != nil {
+					log.Printf("Failed to create secret: %v", err)
+				} else {
+					fmt.Printf("Created secret: %s\n", secretStr)
+				}
+			}
+		}
+	}
+
+	// Seed registry data
+	if registryData, ok := dashboard["registryData"].([]interface{}); ok {
+		for _, regData := range registryData {
+			if regMap, ok := regData.(map[string]interface{}); ok {
+				coreData := map[string]interface{}{
+					"data": regMap["data"],
+					"type": regMap["type"],
+				}
+
+				coreDataJSON, _ := json.Marshal(coreData)
+				customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+
+				params := repo.CreateRegistryDataParams{
+					Subkey:        regMap["subkey"].(string),
+					ValueName:     regMap["value"].(string),
+					CoreData:      coreDataJSON,
+					CustomFields:  customFieldsJSON,
+					SchemaVersion: int32Ptr(1),
+				}
+
+				_, err := querier.CreateRegistryData(ctx, params)
+				if err != nil {
+					log.Printf("Failed to create registry data: %v", err)
+				} else {
+					fmt.Printf("Created registry data: %s\n", regMap["subkey"])
+				}
+			}
+		}
+	}
+
+	// Seed plist data
+	if plistData, ok := dashboard["plistData"].([]interface{}); ok {
+		for _, plistItem := range plistData {
+			if plistMap, ok := plistItem.(map[string]interface{}); ok {
+				coreData := map[string]interface{}{
+					"value": plistMap["value"],
+					"type":  plistMap["type"],
+				}
+
+				coreDataJSON, _ := json.Marshal(coreData)
+				customFieldsJSON, _ := json.Marshal(map[string]interface{}{})
+
+				params := repo.CreatePlistDataParams{
+					Key:           plistMap["key"].(string),
+					CoreData:      coreDataJSON,
+					CustomFields:  customFieldsJSON,
+					SchemaVersion: int32Ptr(1),
+				}
+
+				_, err := querier.CreatePlistData(ctx, params)
+				if err != nil {
+					log.Printf("Failed to create plist data: %v", err)
+				} else {
+					fmt.Printf("Created plist data: %s\n", plistMap["key"])
+				}
 			}
 		}
 	}
@@ -137,7 +308,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 
 func seedEditorConfig(ctx context.Context, querier *repo.Queries) error {
 	// Read editorConfig.json
-	data, err := ioutil.ReadFile("mydata/editorConfig.json")
+	data, err := ioutil.ReadFile("mysampledata/editorConfig.json")
 	if err != nil {
 		return fmt.Errorf("failed to read editorConfig.json: %w", err)
 	}
@@ -157,6 +328,10 @@ func seedEditorConfig(ctx context.Context, querier *repo.Queries) error {
 }
 
 // Helper functions
+func int32Ptr(i int32) *int32 {
+	return &i
+}
+
 func getStringPtr(v interface{}) *string {
 	if v == nil {
 		return nil

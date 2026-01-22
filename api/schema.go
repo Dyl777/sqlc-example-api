@@ -131,9 +131,9 @@ func (h *SchemaHandler) handleAddFieldToRecord(c *gin.Context) {
 	case "docker_container":
 		if req.IsCustom {
 			_, err := h.querier.AddCustomFieldToDockerContainer(c, repo.AddCustomFieldToDockerContainerParams{
-				ID:    recordID,
-				Path:  fieldPathJSON,
-				Value: valueJSON,
+				ID:          recordID,
+				Path:        fieldPathJSON,
+				Replacement: valueJSON,
 			})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -141,9 +141,9 @@ func (h *SchemaHandler) handleAddFieldToRecord(c *gin.Context) {
 			}
 		} else {
 			_, err := h.querier.UpdateDockerContainerField(c, repo.UpdateDockerContainerFieldParams{
-				ID:    recordID,
-				Path:  fieldPathJSON,
-				Value: valueJSON,
+				ID:          recordID,
+				Path:        fieldPathJSON,
+				Replacement: valueJSON,
 			})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -153,9 +153,9 @@ func (h *SchemaHandler) handleAddFieldToRecord(c *gin.Context) {
 	case "git_repo":
 		if req.IsCustom {
 			_, err := h.querier.AddCustomFieldToGitRepo(c, repo.AddCustomFieldToGitRepoParams{
-				ID:    recordID,
-				Path:  fieldPathJSON,
-				Value: valueJSON,
+				ID:          recordID,
+				Path:        fieldPathJSON,
+				Replacement: valueJSON,
 			})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -163,9 +163,9 @@ func (h *SchemaHandler) handleAddFieldToRecord(c *gin.Context) {
 			}
 		} else {
 			_, err := h.querier.UpdateGitRepoField(c, repo.UpdateGitRepoFieldParams{
-				ID:    recordID,
-				Path:  fieldPathJSON,
-				Value: valueJSON,
+				ID:          recordID,
+				Path:        fieldPathJSON,
+				Replacement: valueJSON,
 			})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -189,8 +189,8 @@ func (h *SchemaHandler) handleRemoveFieldFromRecord(c *gin.Context) {
 	switch tableName {
 	case "docker_container":
 		_, err := h.querier.RemoveFieldFromDockerContainer(c, repo.RemoveFieldFromDockerContainerParams{
-			ID:        recordID,
-			FieldName: fieldName,
+			ID:       recordID,
+			CoreData: []byte(fieldName),
 		})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

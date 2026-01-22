@@ -7,6 +7,7 @@ import (
 
 	"github.com/Iknite-Space/sqlc-example-api/db/repo"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type SystemDataHandler struct {
@@ -70,7 +71,7 @@ func (h *SystemDataHandler) handleCreateCacheData(c *gin.Context) {
 		CacheType:     req.CacheType,
 		CoreData:      coreDataJSON,
 		CustomFields:  customFieldsJSON,
-		SchemaVersion: 1,
+		SchemaVersion: int32Ptr(1),
 	}
 
 	cacheData, err := h.querier.CreateCacheData(c, params)
@@ -85,7 +86,7 @@ func (h *SystemDataHandler) handleCreateCacheData(c *gin.Context) {
 func (h *SystemDataHandler) handleListCacheData(c *gin.Context) {
 	technology := c.Query("technology")
 
-	var cacheData []repo.CacheData
+	var cacheData []repo.CacheDatum
 	var err error
 
 	if technology != "" {
@@ -139,8 +140,8 @@ func (h *SystemDataHandler) handleCreateLogEntry(c *gin.Context) {
 		Message:       req.Message,
 		CoreData:      coreDataJSON,
 		CustomFields:  customFieldsJSON,
-		SchemaVersion: 1,
-		Timestamp:     &timestamp,
+		SchemaVersion: int32Ptr(1),
+		Timestamp:     pgtype.Timestamp{Time: timestamp, Valid: true},
 	}
 
 	logEntry, err := h.querier.CreateLogEntry(c, params)
@@ -203,7 +204,7 @@ func (h *SystemDataHandler) handleCreateSecret(c *gin.Context) {
 		Description:   req.Description,
 		CoreData:      coreDataJSON,
 		CustomFields:  customFieldsJSON,
-		SchemaVersion: 1,
+		SchemaVersion: int32Ptr(1),
 	}
 
 	secret, err := h.querier.CreateSecret(c, params)
@@ -257,7 +258,7 @@ func (h *SystemDataHandler) handleCreateRegistryData(c *gin.Context) {
 		ValueName:     req.ValueName,
 		CoreData:      coreDataJSON,
 		CustomFields:  customFieldsJSON,
-		SchemaVersion: 1,
+		SchemaVersion: int32Ptr(1),
 	}
 
 	registryData, err := h.querier.CreateRegistryData(c, params)
@@ -310,7 +311,7 @@ func (h *SystemDataHandler) handleCreatePlistData(c *gin.Context) {
 		Key:           req.Key,
 		CoreData:      coreDataJSON,
 		CustomFields:  customFieldsJSON,
-		SchemaVersion: 1,
+		SchemaVersion: int32Ptr(1),
 	}
 
 	plistData, err := h.querier.CreatePlistData(c, params)

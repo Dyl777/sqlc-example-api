@@ -51,7 +51,7 @@ func (h *DashboardHandler) handleCreateDockerContainer(c *gin.Context) {
 		Status:        req.Status,
 		CoreData:      coreDataJSON,
 		CustomFields:  customFieldsJSON,
-		SchemaVersion: 1,
+		SchemaVersion: int32Ptr(1),
 	}
 
 	container, err := h.querier.CreateDockerContainer(c, params)
@@ -147,7 +147,7 @@ func (h *DashboardHandler) handleUpdateDockerContainer(c *gin.Context) {
 		Status:        req.Status,
 		CoreData:      coreDataJSON,
 		CustomFields:  customFieldsJSON,
-		SchemaVersion: 1,
+		SchemaVersion: int32Ptr(1),
 	}
 
 	container, err := h.querier.UpdateDockerContainer(c, params)
@@ -175,7 +175,7 @@ func (h *DashboardHandler) handleCreateGitRepo(c *gin.Context) {
 		Name:          req.Name,
 		CoreData:      coreDataJSON,
 		CustomFields:  customFieldsJSON,
-		SchemaVersion: 1,
+		SchemaVersion: int32Ptr(1),
 	}
 
 	gitRepo, err := h.querier.CreateGitRepo(c, params)
@@ -240,4 +240,7 @@ func (h *DashboardHandler) handleGetDashboardSummary(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, summary)
+}
+func int32Ptr(i int32) *int32 {
+	return &i
 }
