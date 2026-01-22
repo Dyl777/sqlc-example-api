@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -67,14 +66,13 @@ func run() error {
 
 func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 	// Read dashboard.json
-	data, err := ioutil.ReadFile("mysampledata/dashboard.json")
+	data, err := os.ReadFile("mysampledata/dashboard.json")
 	if err != nil {
 		return fmt.Errorf("failed to read dashboard.json: %w", err)
 	}
 
 	var dashboard map[string]interface{}
-	err = json.Unmarshal(data, &dashboard)
-	if err != nil {
+	if err := json.Unmarshal(data, &dashboard); err != nil {
 		return fmt.Errorf("failed to parse dashboard.json: %w", err)
 	}
 
@@ -308,7 +306,7 @@ func seedDashboardData(ctx context.Context, querier *repo.Queries) error {
 
 func seedEditorConfig(ctx context.Context, querier *repo.Queries) error {
 	// Read editorConfig.json
-	data, err := ioutil.ReadFile("mysampledata/editorConfig.json")
+	data, err := os.ReadFile("mysampledata/editorConfig.json")
 	if err != nil {
 		return fmt.Errorf("failed to read editorConfig.json: %w", err)
 	}
