@@ -1,0 +1,2 @@
+-- Initial schema setup for telemetry and workflow API
+-- This migration creates the foundation for the system
