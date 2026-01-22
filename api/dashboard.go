@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -78,8 +79,14 @@ func (h *DashboardHandler) handleGetDockerContainer(c *gin.Context) {
 
 	// Parse JSON fields for response
 	var coreData, customFields map[string]interface{}
-	json.Unmarshal(container.CoreData, &coreData)
-	json.Unmarshal(container.CustomFields, &customFields)
+	if err := json.Unmarshal(container.CoreData, &coreData); err != nil {
+		log.Printf("Failed to unmarshal core data: %v", err)
+		coreData = make(map[string]interface{})
+	}
+	if err := json.Unmarshal(container.CustomFields, &customFields); err != nil {
+		log.Printf("Failed to unmarshal custom fields: %v", err)
+		customFields = make(map[string]interface{})
+	}
 
 	response := gin.H{
 		"id":            container.ID,
@@ -106,8 +113,14 @@ func (h *DashboardHandler) handleListDockerContainers(c *gin.Context) {
 	var response []gin.H
 	for _, container := range containers {
 		var coreData, customFields map[string]interface{}
-		json.Unmarshal(container.CoreData, &coreData)
-		json.Unmarshal(container.CustomFields, &customFields)
+		if err := json.Unmarshal(container.CoreData, &coreData); err != nil {
+			log.Printf("Failed to unmarshal core data for container %d: %v", container.ID, err)
+			coreData = make(map[string]interface{})
+		}
+		if err := json.Unmarshal(container.CustomFields, &customFields); err != nil {
+			log.Printf("Failed to unmarshal custom fields for container %d: %v", container.ID, err)
+			customFields = make(map[string]interface{})
+		}
 
 		response = append(response, gin.H{
 			"id":            container.ID,
@@ -198,8 +211,14 @@ func (h *DashboardHandler) handleListGitRepos(c *gin.Context) {
 	var response []gin.H
 	for _, repo := range repos {
 		var coreData, customFields map[string]interface{}
-		json.Unmarshal(repo.CoreData, &coreData)
-		json.Unmarshal(repo.CustomFields, &customFields)
+		if err := json.Unmarshal(repo.CoreData, &coreData); err != nil {
+			log.Printf("Failed to unmarshal core data for repo %d: %v", repo.ID, err)
+			coreData = make(map[string]interface{})
+		}
+		if err := json.Unmarshal(repo.CustomFields, &customFields); err != nil {
+			log.Printf("Failed to unmarshal custom fields for repo %d: %v", repo.ID, err)
+			customFields = make(map[string]interface{})
+		}
 
 		response = append(response, gin.H{
 			"id":            repo.ID,

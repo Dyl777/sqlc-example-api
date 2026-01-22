@@ -189,6 +189,20 @@ if err != nil {
 }
 ```
 
+**JSON Unmarshal errors (also `errcheck`):**
+```go
+// Bad - ignoring unmarshal error
+var data map[string]interface{}
+json.Unmarshal(jsonBytes, &data)
+
+// Good - checking unmarshal error with fallback
+var data map[string]interface{}
+if err := json.Unmarshal(jsonBytes, &data); err != nil {
+    log.Printf("Failed to unmarshal: %v", err)
+    data = make(map[string]interface{}) // provide fallback
+}
+```
+
 **Unused functions (`unused`):**
 - Remove functions that aren't called anywhere
 - Or add `//nolint:unused` comment if you plan to use them later
