@@ -9,11 +9,11 @@ The dashboard endpoints power a telemetry application referred to as **owl secur
 
 **Repository**: [owl-security](https://github.com/Dyl777/owl_security) *(Under Development)*
 
-## **Dynamic Schema Management**
+## **Schema Management**
 Due to the broad scope of the telemetry application, the schema management system allows capturing new data types in production without downtime or migrations, enabling field addition/removal while maintaining backward compatibility as monitoring requirements expand.
 
 ## **Vulnerability Workflow Builder**
-The workflow endpoints support an open-source node-flow builder (built on vis.js, similar to Wiz) that visualizes software pipelines and dependency chains as interactive graphs, showing how security vulnerabilities propagate through dependencies and affect downstream components.
+The workflow endpoints support an open-source node-flow builder (built on vis.js, similar to Wiz) I am building that visualizes software pipelines and dependency chains as interactive graphs, showing how security vulnerabilities propagate through dependencies and affect downstream components.
 
 ![Workflow Builder Preview](img/image.png)
 
